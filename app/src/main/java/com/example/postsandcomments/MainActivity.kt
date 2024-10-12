@@ -41,6 +41,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.example.postsandcomments.database.SqliteDatabase
+import com.example.postsandcomments.model.PostModel
 import com.example.postsandcomments.ui.theme.PostsAndCommentsTheme
 import com.example.postsandcomments.viewmodel.PostViewModel
 import java.time.format.TextStyle
@@ -68,23 +69,31 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-            if (checkWifi(this)) {
-                viewModel.updatePost()
-                viewModel.updateComment()
-            } else {
-                Toast.makeText(this, "No wifi- DB not updated", Toast.LENGTH_SHORT).show()
-            }
+        if (checkWifi(this)) {
+            viewModel.updatePost()
+            viewModel.updateComment()
+        } else {
+            Toast.makeText(this, "No wifi- DB not updated", Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.postLiveData.observe(this){}
+
         setContent {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
             ) {
-
                 searchView()
                 Text("Posts")
                 val sizeOfList = 100
-                val fibItems = generateFibItems(sizeOfList)
+//                val fibItems = generateFibItems(sizeOfList)
 
-                addFibonacciList(fibItems)
+//                addFibonacciList(fibItems)
+                val postItems = viewModel.postLiveData
+
+                val posts = postItems.value
+                if (posts != null) {
+                    addPostData(posts)
+                }
 
             }
 
@@ -98,19 +107,17 @@ fun searchView() {
     Column(
         modifier = Modifier
             .wrapContentSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(top = 40.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
         horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
     ) {
-        Text("Posts")
         TextField(
             value = searchText,
             onValueChange = { searchText = it },
             label = { Text("Search") },
             modifier = Modifier.fillMaxWidth()
         )
-
-
     }
 }
 
@@ -145,8 +152,23 @@ private fun addFibonacciList(fibItems: List<Int>) {
             Divider(color = Color.Gray)
         }
     }
+}
+@Composable
+private fun addPostData(postItems: List<PostModel>) {
+    LazyColumn() {
+        items(count = postItems.size) { pos ->
+            Text(
+                text = postItems[pos].title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray)
+                    .padding(vertical = 12.dp),
 
-
+                textAlign = TextAlign.Center
+            )
+            Divider(color = Color.Gray)
+        }
+    }
 }
 
 
