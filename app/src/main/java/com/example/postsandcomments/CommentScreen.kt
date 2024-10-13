@@ -40,12 +40,42 @@ fun CommentScreen(navController: NavController, viewModel: PostViewModel) {
             })
         }
 
-        Text("Comments",modifier = Modifier.padding(top = 40.dp) )
+        var searchText by remember{ mutableStateOf("") }
+        Text("Comments",
+            modifier = Modifier
+                .padding(8.dp))
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
+            horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
+        ) {
+            TextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                label = { Text("Search") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         val comments = viewModel.commentLiveData.observeAsState().value
         if (comments != null) {
-            addCommentsData(comments.filter {
+            val filteredCommentsByPostId= comments.filter {
                 it.postId == viewModel.selectedPostId
-            })
+            }
+            if (searchText == "") {
+                addCommentsData(filteredCommentsByPostId)
+            } else {
+                val shownResult = filteredCommentsByPostId.filter {
+                    it.postId.toString().contains(searchText) ||
+                            it.id.toString().contains(searchText) ||
+                            it.name.contains(searchText) ||
+                            it.body.contains(searchText) ||
+                            it.email.contains(searchText)
+                }
+                addCommentsData(shownResult)
+            }
+
         }
 
     }
