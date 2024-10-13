@@ -38,32 +38,40 @@ fun PostScreen(navController: NavController, viewModel:PostViewModel) {
     Column(
     horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
     ) {
-        searchView()
-        Text("Posts")
-        val posts = viewModel.postLiveData.observeAsState().value
-        if (posts != null) {
-            addPostData(posts, viewModel, navController)
+        var searchText by remember{ mutableStateOf("") }
+        Text("Posts",
+            modifier = Modifier
+                .padding(top = 50.dp))
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
+            horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
+        ) {
+            TextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                label = { Text("Search") },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
-    }
-}
-@Composable
-fun searchView() {
-    var searchText by remember{ mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(16.dp)
-            .padding(top = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
-        horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
-    ) {
-        TextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            label = { Text("Search") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        val posts = viewModel.postLiveData.observeAsState().value
+        if (posts != null) {
+            if (searchText == "") {
+                addPostData(posts, viewModel, navController)
+            } else {
+                val newPosts = posts.filter {
+                    it.body.contains(searchText)
+                            || it.title.contains(searchText)
+                            || it.id.toString().contains(searchText)
+                            || it.userId.toString().contains(searchText)
+                }
+                addPostData(newPosts, viewModel, navController)
+            }
+        }
+
     }
 }
 

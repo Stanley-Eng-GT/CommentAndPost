@@ -33,15 +33,12 @@ fun CommentScreen(navController: NavController, viewModel: PostViewModel) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
     ) {
-//        searchView()
-
         val posts = viewModel.postLiveData.observeAsState().value
         if (posts  != null) {
             addPostOnTop(posts.filter {
                 it.id == viewModel.selectedPostId
             })
         }
-
 
         Text("Comments",modifier = Modifier.padding(top = 40.dp) )
         val comments = viewModel.commentLiveData.observeAsState().value
