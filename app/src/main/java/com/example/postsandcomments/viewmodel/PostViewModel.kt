@@ -12,7 +12,10 @@ class PostViewModel(private val postDao: PostDao, private val commentDao: Commen
     val postRepo = PostRepository(postDao)
     val commentRepo = CommentRepository(commentDao)
 
+    var selectedPostId = -1
+
     val postLiveData = postRepo.posts
+    val commentLiveData = commentRepo.comments
     fun updatePost()= viewModelScope.launch{
         postRepo.postApiCallCopyToDB()
     }

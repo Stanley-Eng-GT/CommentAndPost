@@ -40,6 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.example.postsandcomments.database.SqliteDatabase
 import com.example.postsandcomments.model.PostModel
@@ -77,9 +81,22 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "No wifi- DB not updated", Toast.LENGTH_SHORT).show()
         }
         setContent {
-            PostScreen(viewModel)
+            val navController = rememberNavController()
+            NavigationGraph(navController)
         }
     }
+
+    @Composable
+    fun NavigationGraph(navController: NavHostController) {
+        val navController = rememberNavController()
+
+        NavHost(navController, startDestination = "post") {
+            composable("post") { PostScreen(navController, viewModel) }
+            composable("comment") { CommentScreen(navController, viewModel) }
+        }
+    }
+
+
 }
 @RequiresApi(Build.VERSION_CODES.M)
 private fun checkWifi(context: Context): Boolean {
@@ -87,5 +104,6 @@ private fun checkWifi(context: Context): Boolean {
     val networkInfo = manager.activeNetwork
     return networkInfo != null
 }
+
 
 

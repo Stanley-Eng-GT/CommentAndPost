@@ -1,8 +1,5 @@
 package com.example.postsandcomments
 
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,60 +22,80 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.postsandcomments.model.CommentModel
 import com.example.postsandcomments.model.PostModel
-import com.example.postsandcomments.ui.theme.PostsAndCommentsTheme
 import com.example.postsandcomments.viewmodel.PostViewModel
 
 @Composable
-fun PostScreen(navController: NavController, viewModel:PostViewModel) {
+fun CommentScreen(navController: NavController, viewModel: PostViewModel) {
     Column(
-    horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
+        horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
     ) {
-        searchView()
-        Text("Posts")
+//        searchView()
+
         val posts = viewModel.postLiveData.observeAsState().value
-        if (posts != null) {
-            addPostData(posts, viewModel, navController)
+        if (posts  != null) {
+            addPostOnTop(posts.filter {
+                it.id == viewModel.selectedPostId
+            })
+        }
+
+
+        Text("Comments",modifier = Modifier.padding(top = 40.dp) )
+        val comments = viewModel.commentLiveData.observeAsState().value
+        if (comments != null) {
+            addCommentsData(comments.filter {
+                it.postId == viewModel.selectedPostId
+            })
         }
 
     }
 }
 @Composable
-fun searchView() {
-    var searchText by remember{ mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(16.dp)
-            .padding(top = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
-        horizontalAlignment = Alignment.CenterHorizontally // Align children horizontally
-    ) {
-        TextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            label = { Text("Search") },
-            modifier = Modifier.fillMaxWidth()
+private fun addPostOnTop(postList: List<PostModel>) {
+    val post = postList.first()
+
+    Column() {
+        Text(
+            text = "id: ${post.id}, user id: ${post.userId}",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp)
+                .padding(top = 50.dp),
+
+            textAlign = TextAlign.Start
         )
+        Text(
+            text = "Title: ${post.title}",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp),
+
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = post.body,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp),
+
+            textAlign = TextAlign.Start
+        )
+        Divider(color = Color.Gray)
     }
 }
 
+
 @Composable
-private fun addPostData(postItems: List<PostModel>, viewModel: PostViewModel, navController: NavController) {
+private fun addCommentsData(commentItems: List<CommentModel>) {
     LazyColumn() {
-        items(postItems) { post ->
-            Column(
-                modifier = Modifier.clickable {
-                    viewModel.selectedPostId = post.id
-                    navController.navigate("comment")
-                }
-            ) {
+        items(commentItems) { comment ->
+            Column {
                 Text(
-                    text = "id: ${post.id}, user id: ${post.userId}",
+                    text = "id: ${comment.id}, post id: ${comment.postId}, name: ${comment.name}",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(6.dp),
@@ -86,7 +103,7 @@ private fun addPostData(postItems: List<PostModel>, viewModel: PostViewModel, na
                     textAlign = TextAlign.Start
                 )
                 Text(
-                    text = "Title: ${post.title}",
+                    text = comment.body,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,7 +112,7 @@ private fun addPostData(postItems: List<PostModel>, viewModel: PostViewModel, na
                     textAlign = TextAlign.Start
                 )
                 Text(
-                    text = post.body,
+                    text = "Email: ${comment.email}",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(6.dp),
